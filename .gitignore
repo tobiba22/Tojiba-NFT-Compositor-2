@@ -21,6 +21,9 @@ trash/
 # Remove this line if you want to version-control your trait artwork.
 layers/
 
+# ── Claude Code internal files ───────────────────────────────────────────────
+.claude/
+
 # ── OS junk ───────────────────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db

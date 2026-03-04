@@ -483,6 +483,21 @@ const startCreating = async () => {
   while (layerConfigIdx < layerConfigurations.length) {
     const config = layerConfigurations[layerConfigIdx];
     const layers = setupLayers(config.layersOrder);
+
+    if (layers.length === 0) {
+      throw new Error(
+        "No layers are configured in layersOrder.\n" +
+        "Open the Layers tab, add your layer folders, then try again."
+      );
+    }
+
+    // Warn about any layer that has no PNG files (will be silently skipped)
+    layers.forEach((layer) => {
+      if (layer.elements.length === 0 && !layer.linkedTo) {
+        console.warn(`Warning: Layer "${layer.folderName}" has no PNG files and will be skipped.`);
+      }
+    });
+
     validateLinkedLayers(layers);
 
     // Reset trait counters for each layer configuration block

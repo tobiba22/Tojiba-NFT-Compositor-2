@@ -1,6 +1,6 @@
 {
   "name": "nftgen",
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "NFT collection generator with improved trait weighting and variation.",
   "author": "Tojiba",
   "main": "main.js",

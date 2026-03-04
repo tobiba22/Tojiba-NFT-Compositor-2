@@ -1071,6 +1071,15 @@ app.post("/api/generate/stop", (req, res) => {
 
 app.post("/api/generate", (req, res) => {
   if (generating || testGenerating) return res.status(409).json({ error: "Already generating" });
+
+  // Pre-flight: make sure at least one layer is configured
+  const configuredLayers = getConfigLayerOrder();
+  if (!configuredLayers || configuredLayers.length === 0) {
+    return res.status(400).json({
+      error: "No layers configured. Go to the Layers tab, add your layer folders, then generate."
+    });
+  }
+
   const buildNum = parseInt(req.query.build) || 1;
   generating = true;
   wasStopped = false;
@@ -1099,6 +1108,15 @@ let testSlot = 0; // 0-4, rotating FIFO
 
 app.post("/api/generate/test", (req, res) => {
   if (generating || testGenerating) return res.status(409).json({ error: "Already generating" });
+
+  // Pre-flight: make sure at least one layer is configured
+  const configuredLayersTest = getConfigLayerOrder();
+  if (!configuredLayersTest || configuredLayersTest.length === 0) {
+    return res.status(400).json({
+      error: "No layers configured. Go to the Layers tab, add your layer folders, then test."
+    });
+  }
+
   testGenerating = true;
 
   execFile(process.execPath, [path.join(APP_DIR, "index.js")], { cwd: BASE, env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", APP_DIR, TEST_MODE: "1" }, timeout: 60000 }, (err) => {

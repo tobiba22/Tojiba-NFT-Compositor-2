@@ -12,10 +12,24 @@ permissions:
 
 jobs:
 
+  # ── Create the draft release first so both builders can upload to it ─────────
+  create-release:
+    name: Create Draft Release
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create Draft Release
+        uses: softprops/action-gh-release@v2
+        with:
+          draft: true
+          body: ""
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   # ── Windows build ────────────────────────────────────────────────────────────
   build-windows:
     name: Build (Windows)
     runs-on: windows-latest
+    needs: create-release
 
     steps:
       - name: Checkout code
@@ -38,6 +52,7 @@ jobs:
   build-mac:
     name: Build (macOS)
     runs-on: macos-latest
+    needs: create-release
 
     steps:
       - name: Checkout code
@@ -55,3 +70,15 @@ jobs:
         run: npx electron-builder --mac --publish always
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  # ── Publish once both builds finish ─────────────────────────────────────────
+  publish-release:
+    name: Publish Release
+    runs-on: ubuntu-latest
+    needs: [build-windows, build-mac]
+
+    steps:
+      - name: Publish Release
+        run: gh release edit "${{ github.ref_name }}" --draft=false --repo "${{ github.repository }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

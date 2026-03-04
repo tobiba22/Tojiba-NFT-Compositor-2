@@ -1156,16 +1156,20 @@ app.get("/api/test/metadata/:id", (req, res) => {
 // ── Settings (project folder) ─────────────────────────────────────────────────
 
 let _changeFolderCallback = null;
+let _openFolderCallback   = null;
 
-/** Called by main.js to register the Electron dialog handler. */
+/** Called by main.js to register the Electron folder-picker dialog handler. */
 function onChangeFolderRequest(cb) { _changeFolderCallback = cb; }
+
+/** Called by main.js to register the shell.openPath (Explorer/Finder) handler. */
+function onOpenFolderRequest(cb)  { _openFolderCallback = cb; }
 
 /** Return current project folder path. */
 app.get("/api/settings", (req, res) => {
   res.json({ projectFolder: BASE });
 });
 
-/** Ask main.js to show a folder-picker dialog, then relaunch the app. */
+/** Ask main.js to show a folder-picker dialog, then relaunch into the new folder. */
 app.post("/api/settings/change-folder", async (req, res) => {
   if (!_changeFolderCallback) {
     return res.status(503).json({ error: "Folder picker not available in this mode" });
@@ -1173,6 +1177,17 @@ app.post("/api/settings/change-folder", async (req, res) => {
   try {
     const ok = await _changeFolderCallback();
     res.json({ ok: !!ok });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+/** Ask main.js to open the project folder in Explorer / Finder. */
+app.post("/api/settings/open-folder", async (req, res) => {
+  if (!_openFolderCallback) {
+    return res.status(503).json({ error: "Open folder not available in this mode" });
+  }
+  try {
+    await _openFolderCallback();
+    res.json({ ok: true });
   } catch (e) { res.status(500).json({ error: e.message }); }
 });
 
@@ -1184,4 +1199,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { app, PORT, onChangeFolderRequest };
+module.exports = { app, PORT, onChangeFolderRequest, onOpenFolderRequest };

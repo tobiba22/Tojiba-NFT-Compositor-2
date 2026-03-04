@@ -2,6 +2,7 @@
   "name": "nftgen",
   "version": "1.0.5",
   "description": "NFT collection generator with improved trait weighting and variation.",
+  "author": "Tojiba",
   "main": "main.js",
   "scripts": {
     "generate": "node index.js",
@@ -22,9 +23,10 @@
     "electron-builder": "^26.8.1"
   },
   "build": {
-    "appId": "com.nftgen.app",
+    "appId": "com.tojiba.nftcompositor2",
     "productName": "Tojiba NFT Compositor 2",
-    "icon": "assets/icon.png",
+    "copyright": "Copyright © 2025 Tojiba",
+    "icon": "assets/icon",
     "asarUnpack": [
       "node_modules/@napi-rs/**"
     ],
@@ -45,11 +47,27 @@
       }
     ],
     "win": {
-      "target": "portable"
+      "target": [
+        { "target": "nsis", "arch": ["x64"] },
+        { "target": "zip",  "arch": ["x64"] }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Tojiba NFT Compositor 2",
+      "deleteAppDataOnUninstall": false
     },
     "mac": {
-      "target": "dmg",
+      "target": [
+        { "target": "dmg" }
+      ],
       "category": "public.app-category.graphics-design"
+    },
+    "dmg": {
+      "window": { "width": 540, "height": 380 }
     }
   }
 }

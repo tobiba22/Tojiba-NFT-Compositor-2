@@ -1,11 +1,11 @@
-const { app: electronApp, BrowserWindow, dialog } = require("electron");
+const { app: electronApp, BrowserWindow, dialog, shell } = require("electron");
 const path = require("path");
 const fs = require("fs");
 
 let mainWindow;
 let PORT;
 
-// Prefs file lives in Electron's userData dir — persists across moves/updates
+// Prefs file lives in Electron's userData dir — persists across moves/reinstalls
 const PREFS_PATH = path.join(electronApp.getPath("userData"), "prefs.json");
 
 function loadPrefs() {
@@ -38,12 +38,12 @@ async function getProjectFolder() {
     return prefs.projectFolder;
   }
 
-  // First-run welcome dialog
+  // First-run: welcome and ask for folder
   await dialog.showMessageBox({
     type: "info",
     title: "Tojiba NFT Compositor 2",
     message: "Welcome! Choose a Project Folder",
-    detail: "This is where your layers, builds, and project settings will be saved.\nYou can change it at any time inside the app.",
+    detail: "Pick a folder where your layers, builds, and settings will be stored.\nYou can change this at any time inside the app.",
     buttons: ["Choose Folder"],
   });
 
@@ -63,7 +63,7 @@ async function getProjectFolder() {
     }
   }
 
-  savePrefs({ ...prefs, projectFolder: folder });
+  savePrefs({ ...loadPrefs(), projectFolder: folder });
   return folder;
 }
 
@@ -89,18 +89,27 @@ electronApp.whenReady().then(async () => {
 
   process.env.USER_DATA_DIR = projectFolder;
 
-  const { app: server, PORT: serverPort, onChangeFolderRequest } = require("./server");
+  const {
+    app: server,
+    PORT: serverPort,
+    onChangeFolderRequest,
+    onOpenFolderRequest,
+  } = require("./server");
   PORT = serverPort;
 
-  // Handle folder-change requests triggered from the UI
+  // Let the UI trigger a folder-change dialog, then relaunch into the new folder
   onChangeFolderRequest(async () => {
     const folder = await pickFolderDialog(mainWindow, true);
     if (!folder) return false;
-    const prefs = loadPrefs();
-    savePrefs({ ...prefs, projectFolder: folder });
+    savePrefs({ ...loadPrefs(), projectFolder: folder });
     electronApp.relaunch();
     electronApp.exit(0);
     return true;
+  });
+
+  // Let the UI open the project folder in Explorer / Finder
+  onOpenFolderRequest(async () => {
+    await shell.openPath(projectFolder);
   });
 
   server.listen(PORT, "127.0.0.1", () => {

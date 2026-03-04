@@ -2527,6 +2527,14 @@ loadGeneration();
   } catch { /* non-fatal — footer just shows "—" */ }
 })();
 
+document.getElementById("btn-open-folder").addEventListener("click", async () => {
+  try {
+    await api("/api/settings/open-folder", { method: "POST" });
+  } catch (e) {
+    showToast("Error", [], ["Could not open folder: " + e.message]);
+  }
+});
+
 document.getElementById("btn-change-folder").addEventListener("click", async () => {
   try {
     await api("/api/settings/change-folder", { method: "POST" });

@@ -2205,3 +2205,37 @@ header {
 .log-msg {
   color: var(--text);
 }
+
+/* ── Project folder status bar ──────────────────────────────────────────── */
+
+.project-footer {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 3px 8px;
+  border-top: 2px solid var(--sh);
+  background: var(--face);
+  flex-shrink: 0;
+  font-size: 11px;
+  user-select: none;
+}
+
+.pf-label {
+  white-space: nowrap;
+  font-weight: bold;
+  color: var(--text);
+}
+
+.pf-path {
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.btn-xs {
+  padding: 1px 8px;
+  font-size: 10px;
+}

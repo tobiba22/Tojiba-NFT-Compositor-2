@@ -2516,3 +2516,22 @@ document.getElementById("btn-log-refresh").addEventListener("click", () => {
 
 // ── Boot ──────────────────────────────────────────────────────────────────────
 loadGeneration();
+
+// ── Project folder status bar ─────────────────────────────────────────────────
+(async () => {
+  try {
+    const s = await api("/api/settings");
+    const pathEl = document.getElementById("project-folder-path");
+    pathEl.textContent = s.projectFolder || "—";
+    pathEl.title = s.projectFolder || "";
+  } catch { /* non-fatal — footer just shows "—" */ }
+})();
+
+document.getElementById("btn-change-folder").addEventListener("click", async () => {
+  try {
+    await api("/api/settings/change-folder", { method: "POST" });
+    showToast("Changing folder…", ["The app will restart with your new project folder."]);
+  } catch (e) {
+    showToast("Error", [], ["Could not change project folder: " + e.message]);
+  }
+});

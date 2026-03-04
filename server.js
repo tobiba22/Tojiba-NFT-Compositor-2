@@ -6,11 +6,14 @@ const { execFile } = require("child_process");
 const app = express();
 const PORT = 3000;
 // APP_DIR = where app code lives (inside resources, read-only in packaged build)
-// BASE    = where user data lives (next to the exe for portable, or project root in dev)
+// BASE    = where user data lives; priority: USER_DATA_DIR (chosen by user) →
+//           PORTABLE_EXECUTABLE_DIR (folder containing .exe) → APP_DIR (dev fallback)
 const APP_DIR = path.resolve(__dirname);
-const BASE = process.env.PORTABLE_EXECUTABLE_DIR
-  ? path.resolve(process.env.PORTABLE_EXECUTABLE_DIR)
-  : APP_DIR;
+const BASE = process.env.USER_DATA_DIR
+  ? path.resolve(process.env.USER_DATA_DIR)
+  : process.env.PORTABLE_EXECUTABLE_DIR
+    ? path.resolve(process.env.PORTABLE_EXECUTABLE_DIR)
+    : APP_DIR;
 const LAYERS_DIR = path.join(BASE, "layers");
 const BUILD_DIR = path.join(BASE, "build");
 const IMAGES_DIR = path.join(BUILD_DIR, "images");
@@ -1150,6 +1153,29 @@ app.get("/api/test/metadata/:id", (req, res) => {
   catch (e) { res.status(500).json({ error: e.message }); }
 });
 
+// ── Settings (project folder) ─────────────────────────────────────────────────
+
+let _changeFolderCallback = null;
+
+/** Called by main.js to register the Electron dialog handler. */
+function onChangeFolderRequest(cb) { _changeFolderCallback = cb; }
+
+/** Return current project folder path. */
+app.get("/api/settings", (req, res) => {
+  res.json({ projectFolder: BASE });
+});
+
+/** Ask main.js to show a folder-picker dialog, then relaunch the app. */
+app.post("/api/settings/change-folder", async (req, res) => {
+  if (!_changeFolderCallback) {
+    return res.status(503).json({ error: "Folder picker not available in this mode" });
+  }
+  try {
+    const ok = await _changeFolderCallback();
+    res.json({ ok: !!ok });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 if (require.main === module) {
@@ -1158,4 +1184,4 @@ if (require.main === module) {
   });
 }
 
-module.exports = { app, PORT };
+module.exports = { app, PORT, onChangeFolderRequest };

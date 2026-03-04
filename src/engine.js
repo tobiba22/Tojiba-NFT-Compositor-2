@@ -235,6 +235,9 @@ const selectTrait = (layer, editionsSoFar, influenceMap = {}) => {
     return { element: item.element, effectiveWeight: ew };
   });
 
+  // Layer has no elements (folder is empty or no PNGs found) — skip it.
+  if (adjusted.length === 0) return null;
+
   let random = Math.random() * totalWeight;
   for (const item of adjusted) {
     random -= item.effectiveWeight;
@@ -246,8 +249,11 @@ const selectTrait = (layer, editionsSoFar, influenceMap = {}) => {
     }
   }
 
+  // Floating-point fallback: pick the last candidate.
   const last = adjusted[adjusted.length - 1];
+  if (!last) return null;
   const key = last.element ? last.element.id : "__none__";
+  if (!traitCounters[layer.name]) traitCounters[layer.name] = {};
   traitCounters[layer.name][key] = (traitCounters[layer.name][key] || 0) + 1;
   return last.element;
 };

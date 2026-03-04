@@ -1,5 +1,6 @@
 const basePath = process.cwd();
-const { startCreating, buildSetup } = require(`${basePath}/src/engine.js`);
+const appDir = process.env.APP_DIR || basePath;
+const { startCreating, buildSetup } = require(`${appDir}/src/engine.js`);
 
 (async () => {
   console.log("\n--- NFT Generation Starting ---\n");

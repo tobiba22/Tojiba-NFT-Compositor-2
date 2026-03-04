@@ -1,8 +1,9 @@
 const basePath = process.cwd();
+const appDir = process.env.APP_DIR || basePath;
 const fs = require("fs");
-const sha1 = require(`${basePath}/node_modules/sha1`);
-const { createCanvas, loadImage } = require(`${basePath}/node_modules/@napi-rs/canvas`);
-const { NETWORK } = require(`${basePath}/constants/network.js`);
+const sha1 = require("sha1");
+const { createCanvas, loadImage } = require("@napi-rs/canvas");
+const { NETWORK } = require(`${appDir}/constants/network.js`);
 
 const {
   network,

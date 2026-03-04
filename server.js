@@ -5,7 +5,12 @@ const { execFile } = require("child_process");
 
 const app = express();
 const PORT = 3000;
-const BASE = path.resolve(__dirname);
+// APP_DIR = where app code lives (inside resources, read-only in packaged build)
+// BASE    = where user data lives (next to the exe for portable, or project root in dev)
+const APP_DIR = path.resolve(__dirname);
+const BASE = process.env.PORTABLE_EXECUTABLE_DIR
+  ? path.resolve(process.env.PORTABLE_EXECUTABLE_DIR)
+  : APP_DIR;
 const LAYERS_DIR = path.join(BASE, "layers");
 const BUILD_DIR = path.join(BASE, "build");
 const IMAGES_DIR = path.join(BUILD_DIR, "images");
@@ -34,10 +39,19 @@ const TEST_STORE = path.join(BASE, "test_store");
   if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
 });
 
+// Seed groups.json into user data folder if not present
+const GROUPS_INIT_PATH = path.join(BASE, "src", "groups.json");
+if (!fs.existsSync(GROUPS_INIT_PATH)) {
+  const srcGroups = path.join(APP_DIR, "src", "groups.json");
+  if (fs.existsSync(srcGroups)) fs.copyFileSync(srcGroups, GROUPS_INIT_PATH);
+  else fs.writeFileSync(GROUPS_INIT_PATH, "[]", "utf8");
+}
+
 if (!fs.existsSync(CONFIG_PATH)) {
   fs.writeFileSync(CONFIG_PATH, `const basePath = process.cwd();
-const { MODE } = require(\`\${basePath}/constants/blend_mode.js\`);
-const { NETWORK } = require(\`\${basePath}/constants/network.js\`);
+const appDir = process.env.APP_DIR || basePath;
+const { MODE } = require(\`\${appDir}/constants/blend_mode.js\`);
+const { NETWORK } = require(\`\${appDir}/constants/network.js\`);
 
 const network = NETWORK.eth;
 
@@ -102,7 +116,7 @@ module.exports = {
 }
 
 app.use(express.json({ limit: "20mb" }));
-app.use(express.static(path.join(BASE, "public")));
+app.use(express.static(path.join(APP_DIR, "public")));
 
 // ── Config file mutex (serialise read-modify-write operations) ───────────────
 let _configLock = Promise.resolve();
@@ -1061,7 +1075,7 @@ app.post("/api/generate", (req, res) => {
   writeLog(`Collection generation started (Build ${buildNum})`);
   res.json({ ok: true, message: "Generation started" });
 
-  generateProc = execFile("node", ["index.js"], { cwd: BASE, env: { ...process.env, BUILD_NUM: String(buildNum) } }, (err) => {
+  generateProc = execFile(process.execPath, [path.join(APP_DIR, "index.js")], { cwd: BASE, env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", APP_DIR, BUILD_NUM: String(buildNum) } }, (err) => {
     generating = false;
     generateProc = null;
     if (err && !wasStopped) generateLog.push(`ERROR: ${err.message}`);
@@ -1084,7 +1098,7 @@ app.post("/api/generate/test", (req, res) => {
   if (generating || testGenerating) return res.status(409).json({ error: "Already generating" });
   testGenerating = true;
 
-  execFile("node", ["index.js"], { cwd: BASE, env: { ...process.env, TEST_MODE: "1" }, timeout: 60000 }, (err) => {
+  execFile(process.execPath, [path.join(APP_DIR, "index.js")], { cwd: BASE, env: { ...process.env, ELECTRON_RUN_AS_NODE: "1", APP_DIR, TEST_MODE: "1" }, timeout: 60000 }, (err) => {
     testGenerating = false;
     if (err) return res.status(500).json({ error: err.killed ? "Generation timed out (60s)" : err.message });
 

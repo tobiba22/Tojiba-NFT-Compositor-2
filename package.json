@@ -25,6 +25,9 @@
     "appId": "com.nftgen.app",
     "productName": "Tojiba NFT Compositor 2",
     "icon": "assets/icon.png",
+    "asarUnpack": [
+      "node_modules/@napi-rs/**"
+    ],
     "files": [
       "main.js",
       "server.js",

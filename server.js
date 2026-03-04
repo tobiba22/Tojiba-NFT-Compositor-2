@@ -1153,7 +1153,7 @@ app.get("/api/test/metadata/:id", (req, res) => {
 // ── Start ─────────────────────────────────────────────────────────────────────
 
 if (require.main === module) {
-  app.listen(PORT, () => {
+  app.listen(PORT, "127.0.0.1", () => {
     console.log(`Tojiba NFT Compositor 2 UI running at http://localhost:${PORT}`);
   });
 }

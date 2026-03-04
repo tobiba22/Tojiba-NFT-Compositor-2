@@ -2,7 +2,7 @@
 // Run once with: node create-icon.js
 // Requires the `canvas` package (already in dependencies).
 
-const { createCanvas } = require("canvas");
+const { createCanvas } = require("@napi-rs/canvas");
 const fs = require("fs");
 const path = require("path");
 

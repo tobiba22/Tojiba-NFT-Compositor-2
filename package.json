@@ -13,7 +13,7 @@
   },
   "license": "MIT",
   "dependencies": {
-    "canvas": "^2.11.0",
+    "@napi-rs/canvas": "^0.1.95",
     "express": "^4.22.1",
     "sha1": "^1.1.1"
   },

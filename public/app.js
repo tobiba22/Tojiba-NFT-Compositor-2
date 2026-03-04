@@ -354,25 +354,44 @@ async function loadGeneration() {
   generationLoaded = true;
 }
 
+function updateSolanaVisibility() {
+  const isSol = document.getElementById("cfg-network").value === "sol";
+  document.getElementById("cfg-solana-fields").style.display = isSol ? "contents" : "none";
+}
+
 async function loadGenSettings() {
   const s = await api("/api/config/settings");
-  document.getElementById("cfg-namePrefix").value  = s.namePrefix        ?? "";
-  document.getElementById("cfg-description").value = s.description       ?? "";
-  document.getElementById("cfg-edition").value     = s.growEditionSizeTo ?? "";
-  document.getElementById("cfg-width").value        = s.width            ?? "";
-  document.getElementById("cfg-height").value       = s.height           ?? "";
+  document.getElementById("cfg-namePrefix").value      = s.namePrefix        ?? "";
+  document.getElementById("cfg-description").value     = s.description       ?? "";
+  document.getElementById("cfg-edition").value         = s.growEditionSizeTo ?? "";
+  document.getElementById("cfg-width").value           = s.width             ?? "";
+  document.getElementById("cfg-height").value          = s.height            ?? "";
+  document.getElementById("cfg-network").value         = s.network           || "eth";
+  document.getElementById("cfg-symbol").value          = s.symbol            ?? "";
+  document.getElementById("cfg-seller-fee").value      = s.sellerFee         ?? "";
+  document.getElementById("cfg-external-url").value    = s.externalUrl       ?? "";
+  document.getElementById("cfg-creator-address").value = s.creatorAddress    ?? "";
+  document.getElementById("cfg-creator-share").value   = s.creatorShare      ?? "";
+  updateSolanaVisibility();
 }
 
 loadGenSettings().catch(() => {});
 
 (function attachGenSettingsListeners() {
   const fields = [
-    { id: "cfg-namePrefix",  key: "namePrefix" },
-    { id: "cfg-description", key: "description" },
-    { id: "cfg-edition",     key: "growEditionSizeTo" },
-    { id: "cfg-width",       key: "width" },
-    { id: "cfg-height",      key: "height" },
+    { id: "cfg-namePrefix",       key: "namePrefix" },
+    { id: "cfg-description",      key: "description" },
+    { id: "cfg-edition",          key: "growEditionSizeTo" },
+    { id: "cfg-width",            key: "width" },
+    { id: "cfg-height",           key: "height" },
+    { id: "cfg-network",          key: "network" },
+    { id: "cfg-symbol",           key: "symbol" },
+    { id: "cfg-seller-fee",       key: "sellerFee" },
+    { id: "cfg-external-url",     key: "externalUrl" },
+    { id: "cfg-creator-address",  key: "creatorAddress" },
+    { id: "cfg-creator-share",    key: "creatorShare" },
   ];
+  document.getElementById("cfg-network").addEventListener("change", updateSolanaVisibility);
   fields.forEach(({ id, key }) => {
     const input = document.getElementById(id);
     const save = async function () {

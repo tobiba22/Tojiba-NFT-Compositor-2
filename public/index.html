@@ -51,11 +51,19 @@
         </div>
       </div>
       <div id="gen-settings" class="gen-settings">
-        <div class="gen-field"><label>Collection Title</label><input id="cfg-namePrefix" type="text" /></div>
-        <div class="gen-field"><label>Description</label><input id="cfg-description" type="text" /></div>
-        <div class="gen-field gen-field-sm"><label>Edition Size</label><input id="cfg-edition" type="number" min="1" /></div>
-        <div class="gen-field gen-field-sm"><label>Width (px)</label><input id="cfg-width" type="number" min="1" /></div>
-        <div class="gen-field gen-field-sm"><label>Height (px)</label><input id="cfg-height" type="number" min="1" /></div>
+        <div class="gen-field"><label title="The name prefix for every NFT in the collection. Each piece will be named this followed by its edition number, e.g. &quot;My Collection #1&quot;.">Collection Title</label><input id="cfg-namePrefix" type="text" /></div>
+        <div class="gen-field"><label title="A short description written into every NFT's metadata. Appears on marketplaces below the NFT name.">Description</label><input id="cfg-description" type="text" /></div>
+        <div class="gen-field gen-field-sm"><label title="How many unique NFTs to generate. The engine will combine traits to produce this many distinct pieces.">Edition Size</label><input id="cfg-edition" type="number" min="1" /></div>
+        <div class="gen-field gen-field-sm"><label title="Output image width in pixels. All trait images in your layers folder should match this size.">Width (px)</label><input id="cfg-width" type="number" min="1" /></div>
+        <div class="gen-field gen-field-sm"><label title="Output image height in pixels. All trait images in your layers folder should match this size.">Height (px)</label><input id="cfg-height" type="number" min="1" /></div>
+        <div class="gen-field gen-field-sm"><label title="The blockchain this collection is for. Ethereum uses standard ERC-721 metadata. Solana requires additional fields (symbol, royalty, creator wallet) which will appear below when selected.">Network</label><select id="cfg-network"><option value="eth">Ethereum</option><option value="sol">Solana</option></select></div>
+        <div id="cfg-solana-fields" style="display:none;contents">
+          <div class="gen-field gen-field-sm"><label title="A short ticker symbol for your collection, e.g. MYC. Usually 2–5 capital letters. Shown in wallets and on marketplaces next to each NFT.">Symbol</label><input id="cfg-symbol" type="text" placeholder="e.g. MYC" /></div>
+          <div class="gen-field gen-field-sm"><label title="Your royalty on secondary sales, written in basis points. 100 basis points = 1%, so 500 = 5% royalty. Set to 0 for no royalty.">Royalty (basis pts)</label><input id="cfg-seller-fee" type="number" min="0" max="10000" placeholder="e.g. 500" /></div>
+          <div class="gen-field"><label title="A link to your project website or social page. Shown on some marketplaces. Leave blank if you do not have one.">External URL</label><input id="cfg-external-url" type="text" placeholder="https://yourwebsite.com" /></div>
+          <div class="gen-field"><label title="The Solana wallet address that will receive royalty payments from secondary sales. This should be your own wallet address.">Creator Wallet</label><input id="cfg-creator-address" type="text" placeholder="Your Solana wallet address" /></div>
+          <div class="gen-field gen-field-sm"><label title="What percentage of the royalty this creator receives. If you are the only creator, set this to 100. For multiple creators with a custom split, use the Config tab instead.">Creator Share %</label><input id="cfg-creator-share" type="number" min="1" max="100" placeholder="100" /></div>
+        </div>
       </div>
       <div id="gen-stopped-warn" class="gen-stopped-warn hidden">&#9888; The most recent generation was stopped before completing.</div>
       <div id="gen-log-box" class="log-box hidden">

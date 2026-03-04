@@ -893,18 +893,30 @@ app.get("/api/config/settings", (req, res) => {
     growEditionSizeTo: num(/growEditionSizeTo\s*:\s*(\d+)/),
     width:             num(/\bwidth\s*:\s*(\d+)/),
     height:            num(/\bheight\s*:\s*(\d+)/),
+    network:           str(/const network\s*=\s*NETWORK\.(\w+)/),
+    symbol:            str(/\bsymbol\s*:\s*["'`]([^"'`]*)["'`]/),
+    sellerFee:         num(/seller_fee_basis_points\s*:\s*(\d+)/),
+    externalUrl:       str(/external_url\s*:\s*["'`]([^"'`]*)["'`]/),
+    creatorAddress:    str(/address\s*:\s*["'`]([^"'`]*)["'`]/),
+    creatorShare:      num(/\bshare\s*:\s*(\d+)/),
   });
 });
 
 app.post("/api/config/settings", (req, res) => {
   withConfigLock(() => {
     let raw = fs.readFileSync(CONFIG_PATH, "utf8");
-    const { namePrefix, description, growEditionSizeTo, width, height } = req.body;
+    const { namePrefix, description, growEditionSizeTo, width, height, network, symbol, sellerFee, externalUrl, creatorAddress, creatorShare } = req.body;
     if (namePrefix        !== undefined) raw = raw.replace(/(const namePrefix\s*=\s*["'`])[^"'`]*(["'`])/, `$1${namePrefix}$2`);
     if (description       !== undefined) raw = raw.replace(/(const description\s*=\s*["'`])[^"'`]*(["'`])/, `$1${description}$2`);
     if (growEditionSizeTo !== undefined) raw = raw.replace(/(growEditionSizeTo\s*:\s*)\d+/, `$1${parseInt(growEditionSizeTo)}`);
     if (width             !== undefined) raw = raw.replace(/(\bwidth\s*:\s*)\d+/, `$1${parseInt(width)}`);
     if (height            !== undefined) raw = raw.replace(/(\bheight\s*:\s*)\d+/, `$1${parseInt(height)}`);
+    if (network           !== undefined) raw = raw.replace(/(const network\s*=\s*NETWORK\.)\w+/, `$1${network}`);
+    if (symbol            !== undefined) raw = raw.replace(/(\bsymbol\s*:\s*["'`])[^"'`]*(["'`])/, `$1${symbol}$2`);
+    if (sellerFee         !== undefined) raw = raw.replace(/(seller_fee_basis_points\s*:\s*)\d+/, `$1${parseInt(sellerFee)}`);
+    if (externalUrl       !== undefined) raw = raw.replace(/(external_url\s*:\s*["'`])[^"'`]*(["'`])/, `$1${externalUrl}$2`);
+    if (creatorAddress    !== undefined) raw = raw.replace(/(address\s*:\s*["'`])[^"'`]*(["'`])/, `$1${creatorAddress}$2`);
+    if (creatorShare      !== undefined) raw = raw.replace(/(\bshare\s*:\s*)\d+/, `$1${parseInt(creatorShare)}`);
     fs.writeFileSync(CONFIG_PATH, raw, "utf8");
   }).then(() => { writeLog("Collection settings updated"); res.json({ ok: true }); }).catch(e => res.status(500).json({ error: e.message }));
 });

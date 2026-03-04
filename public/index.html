@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Tojiba NFT Compositor 2</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+  <div id="app">
+    <header>
+      <div class="logo">Tojiba NFT Compositor 2</div>
+      <nav class="tabs">
+        <button class="tab-btn active" data-tab="generation">Generation</button>
+        <button class="tab-btn" data-tab="layers">Layers</button>
+        <button class="tab-btn" data-tab="test">Test</button>
+        <button class="tab-btn" data-tab="random">Random</button>
+        <button class="tab-btn" data-tab="metadata">Metadata</button>
+        <button class="tab-btn" data-tab="rarity">Rarity</button>
+        <button class="tab-btn" data-tab="suggestions">Suggestions</button>
+        <button class="tab-btn" data-tab="comparison">Comparison</button>
+        <button class="tab-btn" data-tab="grouping">Grouping</button>
+        <button class="tab-btn" data-tab="adjust">Advanced</button>
+        <button class="tab-btn" data-tab="config">Config</button>
+        <button class="tab-btn" data-tab="log">Log</button>
+      </nav>
+    </header>
+
+    <!-- LAYERS TAB -->
+    <section id="tab-layers" class="tab-content">
+      <div class="tab-header">
+        <h2>Layer Assets</h2>
+        <span id="layers-summary" class="summary-badge"></span>
+      </div>
+      <div id="layer-manager" class="layer-manager"></div>
+      <div id="layers-container" class="layers-grid"></div>
+    </section>
+
+    <!-- GENERATION TAB -->
+    <section id="tab-generation" class="tab-content active">
+      <div class="tab-header">
+        <h2>Generated Collection</h2>
+        <div class="gen-controls">
+          <select class="build-select"><option value="1">Build 1</option><option value="2">Build 2</option><option value="3">Build 3</option></select>
+          <button id="btn-generate" class="btn btn-primary">&#9654; Generate</button>
+          <button id="btn-stop" class="btn btn-danger hidden">&#9632; Stop</button>
+          <button id="btn-refresh" class="btn btn-secondary">&#8635; Refresh</button>
+          <button id="btn-shuffle" class="btn btn-secondary">&#10227; Shuffle</button>
+          <button id="btn-clear-build" class="btn btn-danger">&#215; Clear</button>
+          <span id="gen-count" class="summary-badge"></span>
+        </div>
+      </div>
+      <div id="gen-settings" class="gen-settings">
+        <div class="gen-field"><label>Collection Title</label><input id="cfg-namePrefix" type="text" /></div>
+        <div class="gen-field"><label>Description</label><input id="cfg-description" type="text" /></div>
+        <div class="gen-field gen-field-sm"><label>Edition Size</label><input id="cfg-edition" type="number" min="1" /></div>
+        <div class="gen-field gen-field-sm"><label>Width (px)</label><input id="cfg-width" type="number" min="1" /></div>
+        <div class="gen-field gen-field-sm"><label>Height (px)</label><input id="cfg-height" type="number" min="1" /></div>
+      </div>
+      <div id="gen-stopped-warn" class="gen-stopped-warn hidden">&#9888; The most recent generation was stopped before completing.</div>
+      <div id="gen-log-box" class="log-box hidden">
+        <div class="log-title">Output</div>
+        <pre id="gen-log"></pre>
+      </div>
+      <div id="gen-grid" class="image-grid"></div>
+    </section>
+
+    <!-- METADATA TAB -->
+    <section id="tab-metadata" class="tab-content">
+      <div class="tab-header">
+        <h2>Metadata Explorer</h2>
+        <select class="build-select"><option value="1">Build 1</option><option value="2">Build 2</option><option value="3">Build 3</option></select>
+        <span id="meta-total" class="summary-badge"></span>
+        <button id="btn-meta-refresh" class="btn btn-ghost">↻ Refresh</button>
+      </div>
+      <div class="meta-layout">
+        <aside class="meta-sidebar">
+          <h3>Rarity</h3>
+          <div id="rarity-panel"></div>
+        </aside>
+        <div class="meta-main">
+          <div class="search-bar">
+            <input id="meta-search" type="text" placeholder="Search by trait value or edition #..." />
+            <button id="btn-meta-search" class="btn btn-secondary">Search</button>
+            <button id="btn-meta-clear" class="btn btn-ghost">Clear</button>
+          </div>
+          <div id="meta-results" class="meta-results"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONFIG TAB -->
+    <section id="tab-config" class="tab-content">
+      <div class="tab-header">
+        <h2>Config Editor</h2>
+        <div class="config-controls">
+          <button id="btn-reload-config" class="btn btn-ghost">↻ Reload</button>
+          <button id="btn-save-config" class="btn btn-primary">Save</button>
+          <span id="config-status" class="config-status"></span>
+        </div>
+      </div>
+      <textarea id="config-editor" class="config-editor" spellcheck="false"></textarea>
+    </section>
+
+    <!-- RARITY TAB -->
+    <section id="tab-rarity" class="tab-content">
+      <div class="tab-header">
+        <h2>Rarity Analysis</h2>
+        <select class="build-select"><option value="1">Build 1</option><option value="2">Build 2</option><option value="3">Build 3</option></select>
+        <span id="rarity-tab-total" class="summary-badge"></span>
+        <button id="btn-rarity-refresh" class="btn btn-ghost">↻ Refresh</button>
+      </div>
+      <div id="rarity-tab-body" class="rarity-tab-body"></div>
+    </section>
+
+    <!-- SUGGESTIONS TAB -->
+    <section id="tab-suggestions" class="tab-content">
+      <div class="tab-header">
+        <h2>Suggestions</h2>
+        <select class="build-select"><option value="1">Build 1</option><option value="2">Build 2</option><option value="3">Build 3</option></select>
+        <span id="suggestions-summary" class="summary-badge"></span>
+        <button id="btn-suggestions-refresh" class="btn btn-ghost">↻ Refresh</button>
+      </div>
+      <div id="suggestions-body" class="rarity-tab-body"></div>
+    </section>
+
+    <!-- GROUPING TAB -->
+    <section id="tab-grouping" class="tab-content">
+      <div class="tab-header">
+        <h2>Trait Grouping</h2>
+        <span id="grouping-summary" class="summary-badge"></span>
+      </div>
+      <div id="grouping-body" class="rarity-tab-body"></div>
+    </section>
+
+    <!-- ADJUST METADATA TAB -->
+    <section id="tab-adjust" class="tab-content">
+      <div class="tab-header">
+        <h2>Advanced</h2>
+        <select class="build-select"><option value="1">Build 1</option><option value="2">Build 2</option><option value="3">Build 3</option></select>
+        <span id="adjust-summary" class="summary-badge"></span>
+        <button id="btn-adjust-refresh" class="btn btn-ghost">↻ Refresh</button>
+      </div>
+      <div id="adjust-body" class="rarity-tab-body"></div>
+    </section>
+
+    <!-- RANDOM TAB -->
+    <section id="tab-random" class="tab-content">
+      <div class="tab-header">
+        <h2>Random Viewer</h2>
+        <select class="build-select"><option value="1">Build 1</option><option value="2">Build 2</option><option value="3">Build 3</option></select>
+        <button id="btn-random" class="btn btn-primary">Random</button>
+        <span id="random-status" class="summary-badge"></span>
+      </div>
+      <div id="random-display" class="random-display">
+        <p class="empty">No collection generated yet.</p>
+      </div>
+    </section>
+
+    <!-- TEST TAB -->
+    <section id="tab-test" class="tab-content">
+      <div class="tab-header">
+        <h2>Test Generator</h2>
+        <button id="btn-test-generate" class="btn btn-primary">Generate Test NFT</button>
+        <span id="test-status" class="summary-badge"></span>
+      </div>
+      <div class="test-info">
+        Quickly preview your project by generating a single random NFT without building an entire collection.
+        Test generations are stored in the <b>test_store/</b> folder (up to 5 at a time, oldest replaced first)
+        and do not affect your main builds.
+      </div>
+      <div id="test-display" class="random-display">
+        <p class="empty">Click "Generate Test NFT" to create a quick preview.</p>
+      </div>
+      <div id="test-history" class="test-history"></div>
+    </section>
+
+    <!-- COMPARISON TAB -->
+    <section id="tab-comparison" class="tab-content">
+      <div class="tab-header">
+        <h2>Build Comparison</h2>
+        <span id="comparison-status" class="summary-badge"></span>
+        <button id="btn-comparison-refresh" class="btn btn-ghost">↻ Refresh</button>
+      </div>
+      <div id="comparison-body" class="rarity-tab-body"></div>
+    </section>
+
+    <!-- LOG TAB -->
+    <section id="tab-log" class="tab-content">
+      <div class="tab-header">
+        <h2>Activity Log</h2>
+        <button id="btn-log-refresh" class="btn btn-ghost">↻ Refresh</button>
+      </div>
+      <div id="log-body" class="log-body"></div>
+    </section>
+  </div>
+
+  <!-- Trait Preview Modal -->
+  <div id="trait-modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="trait-modal-box">
+      <button class="modal-close">&times;</button>
+      <div class="trait-modal-inner">
+        <div class="trait-img-frame">
+          <img id="trait-modal-img" src="" alt="" />
+        </div>
+        <div id="trait-modal-info"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- NFT Detail Modal -->
+  <div id="modal" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="modal-box">
+      <button class="modal-close">&times;</button>
+      <div class="modal-inner">
+        <img id="modal-img" src="" alt="" />
+        <div id="modal-meta"></div>
+      </div>
+    </div>
+  </div>
+
+
+  <div id="toast-container"></div>
+  <script src="app.js"></script>
+</body>
+</html>

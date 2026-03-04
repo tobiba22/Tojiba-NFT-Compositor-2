@@ -1,0 +1,27 @@
+# ── Dependencies ──────────────────────────────────────────────────────────────
+node_modules/
+
+# ── Generated NFT output ──────────────────────────────────────────────────────
+build/
+build_2/
+build_3/
+test_store/
+
+# ── Electron-builder compiled app output ──────────────────────────────────────
+dist/
+
+# ── Runtime files ─────────────────────────────────────────────────────────────
+activity.log
+src/config.js
+
+# ── Trashed trait files ───────────────────────────────────────────────────────
+trash/
+
+# ── Layer artwork (large PNGs — keep out of the repo) ─────────────────────────
+# Remove this line if you want to version-control your trait artwork.
+layers/
+
+# ── OS junk ───────────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+desktop.ini

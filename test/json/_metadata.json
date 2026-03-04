@@ -1,0 +1,59 @@
+[
+  {
+    "name": "toji a test 2 #1",
+    "description": "test new test for bugs",
+    "image": "ipfs://REPLACE_WITH_CID/1.png",
+    "edition": 1,
+    "date": 1772576548399,
+    "attributes": [
+      {
+        "trait_type": "BG",
+        "value": "Entrance"
+      },
+      {
+        "trait_type": "Floor",
+        "value": "Treasure"
+      },
+      {
+        "trait_type": "Cab Shadow",
+        "value": "Cab Shadow"
+      },
+      {
+        "trait_type": "Cabinet",
+        "value": "Girly"
+      },
+      {
+        "trait_type": "Accent",
+        "value": "Pretty"
+      },
+      {
+        "trait_type": "Left Door",
+        "value": "Keyless Lock"
+      },
+      {
+        "trait_type": "Right Door",
+        "value": "Blank"
+      },
+      {
+        "trait_type": "Right Offering",
+        "value": "Kun_Fu"
+      },
+      {
+        "trait_type": "Left Offering",
+        "value": "Doraebox"
+      },
+      {
+        "trait_type": "Toji",
+        "value": "Juicy Fruit"
+      },
+      {
+        "trait_type": "Screen",
+        "value": "Aegankai"
+      },
+      {
+        "trait_type": "Top",
+        "value": "Blank"
+      }
+    ]
+  }
+]

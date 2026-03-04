@@ -238,6 +238,19 @@
     <button id="btn-change-folder" class="btn btn-secondary btn-xs">Change…</button>
   </div>
 
+  <!-- In-page confirm / alert dialog — replaces native window.confirm/alert
+       which steal keyboard focus from the Electron renderer -->
+  <div id="app-dialog" class="modal hidden">
+    <div class="modal-backdrop"></div>
+    <div class="dialog-box">
+      <p id="dialog-msg" class="dialog-msg"></p>
+      <div class="dialog-btns">
+        <button id="dialog-ok"     class="btn btn-primary">OK</button>
+        <button id="dialog-cancel" class="btn btn-ghost">Cancel</button>
+      </div>
+    </div>
+  </div>
+
   <div id="toast-container"></div>
   <script src="app.js"></script>
 </body>

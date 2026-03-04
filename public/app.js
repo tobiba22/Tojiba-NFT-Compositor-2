@@ -74,6 +74,49 @@ function showToast(title, lines, errorLines) {
   }, 5000);
 }
 
+// ── In-page confirm / alert (replaces window.confirm / alert) ────────────────
+// Native OS dialogs steal keyboard focus from the Electron renderer, making
+// all text boxes unresponsive until the app is restarted.  These in-page
+// versions keep focus inside the webview at all times.
+
+const _dlg       = document.getElementById("app-dialog");
+const _dlgMsg    = document.getElementById("dialog-msg");
+const _dlgOk     = document.getElementById("dialog-ok");
+const _dlgCancel = document.getElementById("dialog-cancel");
+
+function _dlgOpen(msg, showCancel) {
+  return new Promise((resolve) => {
+    _dlgMsg.textContent = msg;
+    _dlgCancel.style.display = showCancel ? "" : "none";
+    _dlg.classList.remove("hidden");
+    _dlgOk.focus();
+
+    let keyFn;
+    const finish = (result) => {
+      _dlg.classList.add("hidden");
+      _dlgOk.removeEventListener("click", onOk);
+      _dlgCancel.removeEventListener("click", onCancel);
+      document.removeEventListener("keydown", keyFn, true);
+      resolve(result);
+    };
+    const onOk     = () => finish(true);
+    const onCancel = () => finish(false);
+    keyFn = (e) => {
+      if (e.key === "Enter")  { e.preventDefault(); e.stopPropagation(); finish(true);  }
+      if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); finish(false); }
+    };
+    _dlgOk.addEventListener("click", onOk);
+    _dlgCancel.addEventListener("click", onCancel);
+    document.addEventListener("keydown", keyFn, true);
+  });
+}
+
+/** Drop-in async replacement for window.confirm() */
+function showConfirm(msg) { return _dlgOpen(msg, true);  }
+
+/** Drop-in async replacement for alert() — resolves when user clicks OK */
+function showAlert(msg)   { return _dlgOpen(msg, false); }
+
 // ── LAYERS TAB ────────────────────────────────────────────────────────────────
 let layersLoaded = false;
 let cfgW = 0, cfgH = 0;
@@ -122,7 +165,7 @@ async function loadLayers() {
             img.src = f.base64;
           })));
           const bad = wrong.filter(Boolean);
-          if (bad.length && !confirm(`${bad.length} file(s) don't match the configured ${cfgW}×${cfgH}px:\n\n${bad.join("\n")}\n\nUpload anyway?`)) return;
+          if (bad.length && !await showConfirm(`${bad.length} file(s) don't match the configured ${cfgW}×${cfgH}px:\n\n${bad.join("\n")}\n\nUpload anyway?`)) return;
         }
         uploadBtn.disabled = true;
         fileInput.value = "";
@@ -132,7 +175,7 @@ async function loadLayers() {
             body: JSON.stringify({ files }),
           });
           layersLoaded = false; loadLayers();
-        } catch (e) { alert(`Upload failed: ${e.message}`); uploadBtn.disabled = false; }
+        } catch (e) { showToast("Error", [], [`Upload failed: ${e.message}`]); uploadBtn.disabled = false; }
       });
       header.appendChild(fileInput);
       header.appendChild(uploadBtn);
@@ -185,8 +228,8 @@ function buildLayerManager(orderedNames) {
     try {
       const result = await api("/api/layers/auto-detect", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" });
       if (result.added.length) { layersLoaded = false; loadLayers(); }
-      else alert("All folders are already listed.");
-    } catch (e) { alert(`Failed: ${e.message}`); }
+      else showToast("Auto-detect", ["All folders are already listed."]);
+    } catch (e) { showToast("Error", [], [`Auto-detect failed: ${e.message}`]); }
     autoBtn.disabled = false;
   });
   const addBtn = el("button", "btn btn-secondary lm-add-btn", "+ Add Layer");
@@ -222,7 +265,7 @@ function buildLayerManager(orderedNames) {
         "Upload PNG files to this layer to add traits.",
       ]);
     } catch (e) {
-      alert(`Failed to add layer: ${e.message}`);
+      showToast("Error", [], [`Failed to add layer: ${e.message}`]);
       confirmBtn.disabled = false;
     }
   };
@@ -266,7 +309,7 @@ function buildLayerManager(orderedNames) {
     const { action, name } = btn.dataset;
 
     if (action === "remove") {
-      if (!window.confirm(`Remove "${name}" from config?\n\nThe folder and its assets will NOT be deleted.`)) return;
+      if (!await showConfirm(`Remove "${name}" from config?\n\nThe folder and its assets will NOT be deleted.`)) return;
     }
 
     if (action === "rename") {
@@ -309,7 +352,7 @@ function buildLayerManager(orderedNames) {
           layersLoaded = false;
           loadLayers();
         } catch (e) {
-          alert(`Failed: ${e.message}`);
+          showToast("Error", [], [`Rename failed: ${e.message}`]);
           input.disabled = false;
           saveBtn.disabled = false;
           cancelRename();
@@ -336,7 +379,7 @@ function buildLayerManager(orderedNames) {
       layersLoaded = false;
       loadLayers();
     } catch (e) {
-      alert(`Failed: ${e.message}`);
+      showToast("Error", [], [`Failed: ${e.message}`]);
       btn.disabled = false;
     }
   });
@@ -402,7 +445,7 @@ loadGenSettings().catch(() => {});
           body: JSON.stringify({ [key]: input.value }),
         });
       } catch (e) {
-        alert(`Failed to save ${key}: ${e.message}`);
+        showToast("Error", [], [`Failed to save ${key}: ${e.message}`]);
       }
     };
     input.addEventListener("change", save);
@@ -507,7 +550,7 @@ function pollGeneration() {
 }
 
 document.getElementById("btn-shuffle").addEventListener("click", async () => {
-  if (!window.confirm("Shuffle the collection?\n\nThis will reassign edition numbers in a random order. The image and metadata files will be renamed to match.")) return;
+  if (!await showConfirm("Shuffle the collection?\n\nThis will reassign edition numbers in a random order. The image and metadata files will be renamed to match.")) return;
 
   const btn = document.getElementById("btn-shuffle");
   const genBtn = document.getElementById("btn-generate");
@@ -521,7 +564,7 @@ document.getElementById("btn-shuffle").addEventListener("click", async () => {
     rarityTabLoaded = false; suggestionsLoaded = false; comparisonLoaded = false;
     await refreshImages();
   } catch (e) {
-    alert(`Shuffle failed: ${e.message}`);
+    showToast("Error", [], [`Shuffle failed: ${e.message}`]);
   } finally {
     btn.disabled = false;
     genBtn.disabled = false;
@@ -530,7 +573,7 @@ document.getElementById("btn-shuffle").addEventListener("click", async () => {
 });
 
 document.getElementById("btn-clear-build").addEventListener("click", async () => {
-  if (!window.confirm(`Clear all images and metadata from Build ${currentBuild}?\n\nThis cannot be undone.`)) return;
+  if (!await showConfirm(`Clear all images and metadata from Build ${currentBuild}?\n\nThis cannot be undone.`)) return;
   const btn = document.getElementById("btn-clear-build");
   btn.disabled = true;
   btn.textContent = "Clearing\u2026";
@@ -540,7 +583,7 @@ document.getElementById("btn-clear-build").addEventListener("click", async () =>
     suggestionsLoaded = false; comparisonLoaded = false;
     await refreshImages();
   } catch (e) {
-    alert(`Clear failed: ${e.message}`);
+    showToast("Error", [], [`Clear failed: ${e.message}`]);
   } finally {
     btn.disabled = false;
     btn.textContent = "\u00D7 Clear";
@@ -855,7 +898,7 @@ function openTraitModal(layerFolder, trait, imgUrl) {
   });
 
   document.getElementById("tmi-delete-btn").addEventListener("click", async () => {
-    if (!confirm(`Move "${trait.name}" to trash?\n\nThe file will be moved to the trash/ folder and can be restored manually.`)) return;
+    if (!await showConfirm(`Move "${trait.name}" to trash?\n\nThe file will be moved to the trash/ folder and can be restored manually.`)) return;
     const btn = document.getElementById("tmi-delete-btn");
     const statusEl = document.getElementById("tmi-delete-status");
     btn.disabled = true;
@@ -1632,7 +1675,7 @@ function adjBuildLayerOptionsSection(layers, layerOpts) {
         } else if (badge) badge.remove();
         row.classList.toggle("adj-lo-row-linked", !!select.value);
         row.classList.toggle("adj-lo-row-muted", cb.checked);
-      } catch (e) { alert(`Failed: ${e.message}`); }
+      } catch (e) { showToast("Error", [], [`Failed: ${e.message}`]); }
     };
     select.addEventListener("change", save);
     cb.addEventListener("change", save);
@@ -1707,7 +1750,7 @@ async function adjPreviewEdition(n) {
 }
 
 async function adjDeleteEdition(n) {
-  if (!window.confirm(`Delete edition #${n}?\n\nThe image and JSON files will be permanently removed. The slot remains empty as a placeholder until you upload a replacement.`)) return;
+  if (!await showConfirm(`Delete edition #${n}?\n\nThe image and JSON files will be permanently removed. The slot remains empty as a placeholder until you upload a replacement.`)) return;
   try {
     await api(`/api/edition/${n}${buildQ("?")}`, { method: "DELETE" });
     document.getElementById("adj-ed-preview").innerHTML =
@@ -1720,7 +1763,7 @@ async function adjDeleteEdition(n) {
     try { const md = await api("/api/metadata" + buildQ("?")); adjTemplateMeta = md.items[0] || null; } catch (_) {}
     adjRenderEmptySlots(document.getElementById("adj-slots-panel"), emptySlots);
   } catch (e) {
-    alert(`Delete failed: ${e.message}`);
+    showToast("Error", [], [`Delete failed: ${e.message}`]);
   }
 }
 
@@ -1915,7 +1958,7 @@ async function adjApplyBulk(form) {
     if (key) customFields[key] = val || null;
   });
 
-  if (!window.confirm("Apply these field changes to all edition JSON files?")) return;
+  if (!await showConfirm("Apply these field changes to all edition JSON files?")) return;
 
   btn.disabled = true;
   status.textContent = "Applying\u2026"; status.className = "adj-status";
@@ -2016,7 +2059,7 @@ function adjAddRule(list, traitTypes, rarity) {
 
 async function adjApplyHiddenLayer(form) {
   const traitType = form.querySelector("#adj-hl-type").value.trim();
-  if (!traitType) { alert("Enter a trait type name."); return; }
+  if (!traitType) { showToast("", [], ["Enter a trait type name."]); return; }
 
   const mode = form.querySelector("#adj-hl-mode").value;
   const btn = form.querySelector("#adj-hl-apply");
@@ -2026,7 +2069,7 @@ async function adjApplyHiddenLayer(form) {
 
   if (mode === "simple") {
     const val = form.querySelector("#adj-hl-simple-val").value.trim();
-    if (!val) { alert("Enter a value."); return; }
+    if (!val) { showToast("", [], ["Enter a value."]); return; }
     rules = [{ matchTraitType: null, matchValue: null, assignValue: val }];
   } else {
     form.querySelectorAll(".adj-rule-row").forEach((row) => {
@@ -2036,10 +2079,10 @@ async function adjApplyHiddenLayer(form) {
       if (matchTraitType && matchValue && assignValue) rules.push({ matchTraitType, matchValue, assignValue });
     });
     defaultValue = form.querySelector("#adj-hl-default").value.trim() || null;
-    if (!rules.length && !defaultValue) { alert("Add at least one rule or a default value."); return; }
+    if (!rules.length && !defaultValue) { showToast("", [], ["Add at least one rule or a default value."]); return; }
   }
 
-  if (!window.confirm(`Add trait "${traitType}" to all edition JSON files?`)) return;
+  if (!await showConfirm(`Add trait "${traitType}" to all edition JSON files?`)) return;
 
   btn.disabled = true; status.textContent = "Applying\u2026"; status.className = "adj-status";
   try {

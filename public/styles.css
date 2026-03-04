@@ -2239,3 +2239,30 @@ header {
   padding: 1px 8px;
   font-size: 10px;
 }
+
+/* ── In-page confirm/alert dialog ───────────────────────────────────────── */
+
+.dialog-box {
+  background: var(--face);
+  border: 2px solid var(--sh2);
+  box-shadow: 4px 4px 0 var(--sh2);
+  padding: 16px 20px 12px;
+  min-width: 260px;
+  max-width: 420px;
+  position: relative;
+  z-index: 1;
+}
+
+.dialog-msg {
+  margin: 0 0 14px;
+  white-space: pre-wrap;
+  font-size: 11px;
+  line-height: 1.55;
+  color: var(--text);
+}
+
+.dialog-btns {
+  display: flex;
+  gap: 6px;
+  justify-content: flex-end;
+}

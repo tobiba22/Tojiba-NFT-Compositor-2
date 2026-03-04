@@ -269,10 +269,63 @@ Use this tab for advanced configuration that the Generation tab doesn't expose, 
 - `shuffleEditions` — Automatically shuffle edition order after generation
 - `maxCollisionRetries` — How many times the engine tries to find a unique DNA before giving up
 - `network` — Switch between `NETWORK.eth` (Ethereum) and `NETWORK.sol` (Solana)
-- `solanaMetadata` — Solana-specific fields (symbol, seller fee, creators list)
+- `solanaMetadata` — Solana-specific fields (symbol, seller fee, creators list) — see below
 - `baseUri` — The IPFS URI prefix for the `image` field in metadata
 - `extraMetadata` — Additional fields to inject into every JSON at the top level
 - `layerConfigurations` — Advanced: multiple generation runs with different layer sets and edition sizes
+
+### Solana Metadata (`solanaMetadata`)
+
+If you are minting on **Solana**, you need to fill out the `solanaMetadata` block. It looks like this in the config:
+
+```js
+const solanaMetadata = {
+  symbol: "MYC",
+  seller_fee_basis_points: 500,
+  external_url: "https://yourwebsite.com",
+  creators: [
+    {
+      address: "REPLACE_WITH_SOLANA_ADDRESS",
+      share: 100,
+    },
+  ],
+};
+```
+
+Here is what each field means:
+
+| Field | What to put here |
+|---|---|
+| `symbol` | A short ticker-style abbreviation for your collection, e.g. `"MYC"`. Usually 2–5 capital letters. |
+| `seller_fee_basis_points` | Your royalty percentage expressed in basis points. 100 basis points = 1%, so `500` = 5% royalty on secondary sales. Set to `0` for no royalty. |
+| `external_url` | A link to your project's website or social page. Can be left as `""` if you don't have one. |
+| `creators` | A list of wallet addresses that receive the royalty. The `share` values across all entries must add up to exactly `100`. |
+
+**Single creator example** (you keep 100% of royalties):
+```js
+creators: [
+  {
+    address: "YourSolanaWalletAddressHere",
+    share: 100,
+  },
+],
+```
+
+**Split royalties between two people** (60/40 split):
+```js
+creators: [
+  {
+    address: "FirstPersonsWalletAddress",
+    share: 60,
+  },
+  {
+    address: "SecondPersonsWalletAddress",
+    share: 40,
+  },
+],
+```
+
+> **Note:** `solanaMetadata` is only written into the output JSON when `network` is set to `NETWORK.sol`. If you are minting on Ethereum, you can leave this block as-is and it will be ignored.
 
 Click **Save** to write the file. The status indicator shows "Saved!" or an error message. Click **↻ Reload** to discard unsaved edits and reload from disk.
 

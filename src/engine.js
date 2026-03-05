@@ -97,7 +97,7 @@ const getElements = (dirPath) => {
 };
 
 const setupLayers = (layersOrder) => {
-  return layersOrder.map((layerObj, index) => {
+  return layersOrder.filter(layerObj => layerObj != null).map((layerObj, index) => {
     const opts = layerObj.options || {};
     return {
       id: index,

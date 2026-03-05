@@ -221,6 +221,9 @@ function buildLayerManager(orderedNames) {
   // Header row
   const hdr = el("div", "lm-header");
   hdr.innerHTML = `<span class="lm-header-title">Layer Order <span class="lm-hint">bottom \u2192 top</span></span>`;
+  const refreshBtn = el("button", "btn btn-secondary lm-add-btn", "\u21BB Refresh");
+  refreshBtn.title = "Reload all layer folders from disk";
+  refreshBtn.addEventListener("click", () => { layersLoaded = false; loadLayers(); });
   const autoBtn = el("button", "btn btn-secondary lm-add-btn", "\u{1F50D} Auto Detect");
   autoBtn.title = "Add all folders found in layers/ that aren't already listed";
   autoBtn.addEventListener("click", async () => {
@@ -233,6 +236,7 @@ function buildLayerManager(orderedNames) {
     autoBtn.disabled = false;
   });
   const addBtn = el("button", "btn btn-secondary lm-add-btn", "+ Add Layer");
+  hdr.appendChild(refreshBtn);
   hdr.appendChild(autoBtn);
   hdr.appendChild(addBtn);
   mgr.appendChild(hdr);
@@ -2246,7 +2250,7 @@ async function renderTestNFT(slot) {
 
   display.innerHTML = `<div class="spinner"></div>`;
   try {
-    const item = await api(`/api/test/metadata/${slot}`);
+    const item = await api(`/api/test/metadata/${slot}?t=${Date.now()}`);
     const attrs = (item.attributes || [])
       .map(a => `<div class="modal-attr"><span class="modal-attr-type">${esc(a.trait_type)}</span><span class="modal-attr-val">${esc(a.value)}</span></div>`)
       .join("");

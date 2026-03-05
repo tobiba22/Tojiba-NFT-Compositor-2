@@ -1124,15 +1124,20 @@ app.post("/api/generate/test", (req, res) => {
     if (err) return res.status(500).json({ error: err.killed ? "Generation timed out (60s)" : err.message });
 
     // Copy engine output from test/ to test_store/ with rotating slot
+    // Edition index is 0 for Solana, 1 for Ethereum — scan instead of hardcoding
     testSlot = (testSlot % 5) + 1; // 1-5
-    const srcImg = path.join(BASE, "test", "images", "1.png");
-    const srcJson = path.join(BASE, "test", "json", "1.json");
+    const testImgDir  = path.join(BASE, "test", "images");
+    const testJsonDir = path.join(BASE, "test", "json");
+    const imgFiles  = fs.existsSync(testImgDir)  ? fs.readdirSync(testImgDir).filter(f  => /^\d+\.png$/.test(f))  : [];
+    const jsonFiles = fs.existsSync(testJsonDir) ? fs.readdirSync(testJsonDir).filter(f => /^\d+\.json$/.test(f)) : [];
+    const srcImg  = imgFiles.length  ? path.join(testImgDir,  imgFiles[0])  : null;
+    const srcJson = jsonFiles.length ? path.join(testJsonDir, jsonFiles[0]) : null;
     const dstImg = path.join(TEST_STORE, "images", `${testSlot}.png`);
     const dstJson = path.join(TEST_STORE, "json", `${testSlot}.json`);
 
     try {
-      if (fs.existsSync(srcImg)) fs.copyFileSync(srcImg, dstImg);
-      if (fs.existsSync(srcJson)) fs.copyFileSync(srcJson, dstJson);
+      if (srcImg  && fs.existsSync(srcImg))  fs.copyFileSync(srcImg,  dstImg);
+      if (srcJson && fs.existsSync(srcJson)) fs.copyFileSync(srcJson, dstJson);
     } catch (e) { console.error("Skipped file:", e.message); }
 
     writeLog("Test NFT generated");

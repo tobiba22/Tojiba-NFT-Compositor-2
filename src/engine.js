@@ -442,6 +442,7 @@ const mapDnaToLayers = (dna, layers) => {
       blend: layer.blend,
       opacity: layer.opacity,
       selectedElement,
+      muted: layer.muted,
     };
   });
 };
